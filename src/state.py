@@ -10,7 +10,7 @@ from teams.state import TurnState, ConversationState, UserState, TempState
 
 
 class AppConversationState(ConversationState):
-    tasks: Dict[str, Any]
+    tasks: Dict[str, Any]=None
 
     @classmethod
     async def load(cls, context: TurnContext, storage: Optional[Storage] = None) -> "AppConversationState":
