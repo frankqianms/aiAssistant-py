@@ -1,10 +1,13 @@
 import os
 import sys
 import traceback
+from typing import Any, Dict
 
 from botbuilder.core import MemoryStorage, TurnContext
+from state import AppTurnState
 from teams import Application, ApplicationOptions, TeamsAdapter
 from teams.ai import AIOptions
+from teams.ai.actions import ActionTurnContext
 from teams.ai.models import AzureOpenAIModelOptions, OpenAIModel, OpenAIModelOptions
 from teams.ai.planners import ActionPlanner, ActionPlannerOptions
 from teams.ai.prompts import PromptManager, PromptManagerOptions
@@ -28,12 +31,12 @@ model = OpenAIModel(
 prompts = PromptManager(PromptManagerOptions(prompts_folder=f"{os.getcwd()}/prompts"))
 
 planner = ActionPlanner(
-    ActionPlannerOptions(model=model, prompts=prompts, default_prompt="chat")
+    ActionPlannerOptions(model=model, prompts=prompts, default_prompt="planner")
 )
 
 # Define storage and application
 storage = MemoryStorage()
-bot_app = Application[TurnState](
+bot_app = Application[AppTurnState](
     ApplicationOptions(
         bot_app_id=config.APP_ID,
         storage=storage,
@@ -45,6 +48,29 @@ bot_app = Application[TurnState](
 @bot_app.conversation_update("membersAdded")
 async def on_members_added(context: TurnContext, state: TurnState):
     await context.send_activity("How can I help you today?")
+    
+@bot_app.turn_state_factory
+async def turn_state_factory(context: TurnContext):
+    return await AppTurnState.load(context, storage)
+
+@bot_app.ai.action("createTask")
+async def create_task(context: ActionTurnContext[Dict[str, Any]], state: AppTurnState, parameters: Dict[str, Any]):
+    if not state.conversation.tasks:
+        state.conversation.tasks = {}
+    task = {"title": parameters["title"], "description": parameters["description"]}
+    state.conversation.tasks[parameters["title"]] = task
+    return f"task created, think about your next action"
+
+@bot_app.ai.action("deleteTask")
+async def delete_task(context: ActionTurnContext[Dict[str, Any]], state: AppTurnState, parameters: Dict[str, Any]):
+    if not state.conversation.tasks:
+        state.conversation.tasks = {}
+    if parameters["title"] not in state.conversation.tasks:
+        await context.sendActivity(f"There is no task {parameters.title}")
+        return "task not found, think about your next action"
+    del state.conversation.tasks[parameters["title"]]
+    return f"task deleted, think about your next action"
+    
 
 @bot_app.error
 async def on_error(context: TurnContext, error: Exception):
