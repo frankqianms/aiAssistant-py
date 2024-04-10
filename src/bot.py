@@ -34,7 +34,7 @@ async def on_members_added(context: TurnContext, state: TurnState):
     await context.send_activity("How can I help you today?")
     
 @bot_app.ai.action("getCurrentWeather")
-async def get_current_weather(context: TurnContext, state: TurnState, parameters: Dict[str, Any]):
+async def get_current_weather(context: TurnContext, state: TurnState):
     weatherData = {
         'San Francisco, CA': {
             'f': '71.6F',
@@ -45,15 +45,16 @@ async def get_current_weather(context: TurnContext, state: TurnState, parameters
             'c': '24C',
         },
     }
-    location = parameters.get("location")
+    # await context.send_activities("hello")
+    location = context.data.get("location")
     if weatherData[location] == None:
         print(f"No weather data for ${location} found")
-        await context.send_activity(f"No weather data for ${location} found")
+        # await context.send_activity(f"No weather data for ${location} found")
         return f"No weather data for ${location} found"
     
-    print(weatherData[location][parameters.get("unit") if parameters.get("unit") else 'f'])
-    await context.send_activity(weatherData[location][parameters.get("unit") if parameters.get("unit") else 'f'])
-    return weatherData[location][parameters.get("unit") if parameters.get("unit") else 'f']
+    print(weatherData[location][context.data.get("unit") if context.data.get("unit") else 'f'])
+    # await context.send_activity(weatherData[location][context.data.get("unit") if context.data.get("unit") else 'f'])
+    return weatherData[location][context.data.get("unit") if context.data.get("unit") else 'f']
 
 @bot_app.ai.action("getNickname")
 async def get_nickname(context: TurnContext, state: TurnState, parameters: Dict[str, Any]):

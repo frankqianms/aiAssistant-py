@@ -1,3 +1,4 @@
+import json
 import asyncio, os
 from teams.ai.planners import AssistantsPlanner, AssistantsPlannerOptions
 from openai.types.beta import AssistantCreateParams
@@ -9,6 +10,10 @@ from dotenv import load_dotenv
 load_dotenv(f'{os.getcwd()}/env/.env.testtool.user')
 
 async def main():
+    with open(
+        f"{os.getcwd()}/src/utils/tool_schema.json", "r", encoding="utf-8"
+    ) as file:
+        tools = json.load(file)
     options = AssistantCreateParams(
         name="Assistant",
         instructions="\n".join([
@@ -25,22 +30,9 @@ async def main():
                 function=FunctionDefinition(
                     name="getCurrentWeather",
                     description="Get the weather in location",
-                    parameters={
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "type": "string",
-                                "description": "The city and state e.g. San Francisco, CA",
-                            },
-                            "unit": {
-                                "type": "string",
-                                "enum": ["c", "f"],
-                            },
-                        },
-                        "required": ["location"],
-                    }
+                    parameters=tools
                 )
-            ),
+            )
             # FunctionToolParam(
             #     type="function",
             #     function=FunctionDefinition(
