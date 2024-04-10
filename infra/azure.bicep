@@ -57,6 +57,14 @@ resource webApp 'Microsoft.Web/sites@2021-02-01' = {
           value: 'true'
         }
         {
+          name: 'SCM_COMMAND_IDLE_TIMEOUT'
+          value: '230'
+        }
+        {
+          name: 'WEBSITES_CONTAINER_START_TIME_LIMIT'
+          value: '1800'
+        }
+        {
           name: 'BOT_ID'
           value: botAadAppClientId
         }
