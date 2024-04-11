@@ -73,7 +73,6 @@ async def delete_task(context: ActionTurnContext[Dict[str, Any]], state: AppTurn
     del state.conversation.tasks[parameters["title"]]
     return f"task deleted, think about your next action"
     
-
 @bot_app.error
 async def on_error(context: TurnContext, error: Exception):
     # This check writes out errors to console log .vs. app insights.
