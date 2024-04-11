@@ -57,7 +57,7 @@ async def turn_state_factory(context: TurnContext):
 async def create_task(context: ActionTurnContext[Dict[str, Any]], state: AppTurnState):
     if not state.conversation.tasks:
         state.conversation.tasks = {}
-    parameters = state.conversation.planner_history[-1].content['action']['parameters']
+    parameters = state.conversation.planner_history[-1].content.action.parameters
     task = {"title": parameters["title"], "description": parameters["description"]}
     state.conversation.tasks[parameters["title"]] = task
     return f"task created, think about your next action"
@@ -66,7 +66,7 @@ async def create_task(context: ActionTurnContext[Dict[str, Any]], state: AppTurn
 async def delete_task(context: ActionTurnContext[Dict[str, Any]], state: AppTurnState):
     if not state.conversation.tasks:
         state.conversation.tasks = {}
-    parameters = state.conversation.planner_history[-1].content['action']['parameters']
+    parameters = state.conversation.planner_history[-1].content.action.parameters
     if parameters["title"] not in state.conversation.tasks:
         await context.sendActivity(f"There is no task {parameters.title}")
         return "task not found, think about your next action"
